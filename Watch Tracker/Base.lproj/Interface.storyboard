@@ -63,6 +63,18 @@
                             </items>
                         </group>
                     </items>
+                    <menu key="menu" id="WRL-BE-iVG">
+                        <items>
+                            <menuItem title="Menu Item" id="bYj-Z2-uwA"/>
+                        </items>
+                    </menu>
+                    <connections>
+                        <outlet property="followUserButton" destination="3QZ-4r-aMl" id="8qO-iM-6qF"/>
+                        <outlet property="newPinButton" destination="juk-oB-3vV" id="DlS-nv-gso"/>
+                        <outlet property="resetButton" destination="g9l-MU-PFV" id="b0f-T0-n4K"/>
+                        <outlet property="saveButton" destination="Yfa-t6-5Sk" id="wSw-vL-lxz"/>
+                        <outlet property="trackerButton" destination="exN-t4-It8" id="8DR-Io-4Vr"/>
+                    </connections>
                 </controller>
             </objects>
             <point key="canvasLocation" x="5" y="87.5"/>
