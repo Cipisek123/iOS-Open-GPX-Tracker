@@ -5,7 +5,7 @@
 //  Created by Vincent on 9/12/18.
 //
 
-import UIKit
+import Foundation
 
 open class GPXTrackPoint: GPXWaypoint {
     
@@ -23,48 +23,27 @@ open class GPXTrackPoint: GPXWaypoint {
     
     public override init(dictionary: [String : String]) {
         super.init()
-        self.time = ISO8601DateParser.parse(dictionary ["time"] ?? "")
-        self.elevation = number(from: dictionary["ele"])
-        self.latitude = number(from: dictionary["lat"])
-        self.longitude = number(from: dictionary["lon"])
-        self.magneticVariation = number(from: dictionary["magvar"])
-        self.geoidHeight = number(from: dictionary["geoidheight"])
-        self.name = dictionary["name"]
-        self.comment = dictionary["cmt"]
-        self.desc = dictionary["desc"]
-        self.source = dictionary["src"]
-        self.symbol = dictionary["sym"]
-        self.type = dictionary["type"]
-        self.fix = Int(dictionary["fix"] ?? "")
-        self.satellites = Int(dictionary["sat"] ?? "")
-        self.horizontalDilution = number(from: dictionary["hdop"])
-        self.verticalDilution = number(from: dictionary["vdop"])
-        self.positionDilution = number(from: dictionary["pdop"])
-        self.DGPSid = Int(dictionary["dgpsid"] ?? "")
+        self.time = ISO8601DateParser.parse(dictionary ["time"])
+        waypointProcess.async(flags: .barrier) {
+            self.elevation = self.number(from: dictionary["ele"])
+            self.latitude = self.number(from: dictionary["lat"])
+            self.longitude = self.number(from: dictionary["lon"])
+            self.magneticVariation = self.number(from: dictionary["magvar"])
+            self.geoidHeight = self.number(from: dictionary["geoidheight"])
+            self.name = dictionary["name"]
+            self.comment = dictionary["cmt"]
+            self.desc = dictionary["desc"]
+            self.source = dictionary["src"]
+            self.symbol = dictionary["sym"]
+            self.type = dictionary["type"]
+            self.fix = self.integer(from: dictionary["fix"])
+            self.satellites = self.integer(from: dictionary["sat"])
+            self.horizontalDilution = self.number(from: dictionary["hdop"])
+            self.verticalDilution = self.number(from: dictionary["vdop"])
+            self.positionDilution = self.number(from: dictionary["pdop"])
+            self.DGPSid = self.integer(from: dictionary["dgpsid"])
+        }
     }
-    /*
- public var links = [GPXLink]()
- public var elevation = CGFloat()
- public var time: Date?
- public var magneticVariation = CGFloat()
- public var geoidHeight = CGFloat()
- public var name: String?
- public var comment = String()
- public var desc: String?
- public var source = String()
- public var symbol = String()
- public var type = String()
- public var fix = Int()
- public var satellites = Int()
- public var horizontalDilution = CGFloat()
- public var verticalDilution = CGFloat()
- public var positionDilution = CGFloat()
- public var ageofDGPSData = CGFloat()
- public var DGPSid = Int()
- public var extensions: GPXExtensions? = GPXExtensions()
- public var latitude: CGFloat?
- public var longitude: CGFloat?
- */
     
     // MARK:- Tag
     

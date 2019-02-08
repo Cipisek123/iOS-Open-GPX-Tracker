@@ -5,7 +5,7 @@
 //  Created by Vincent on 2/11/18.
 //  
 
-import UIKit
+import Foundation
 
 open class GPXParser: NSObject, XMLParserDelegate {
     
@@ -87,15 +87,6 @@ open class GPXParser: NSObject, XMLParserDelegate {
     var isTrackSegment: Bool = false
     var isTrackPoint: Bool = false
     var isExtension: Bool = false
-    
-    func value(from string: String?) -> CGFloat? {
-        if string != nil {
-            if let number = NumberFormatter().number(from: string!) {
-                return CGFloat(number.doubleValue)
-            }
-        }
-        return nil
-    }
 
     public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
         element = elementName
@@ -164,15 +155,17 @@ open class GPXParser: NSObject, XMLParserDelegate {
     }
     
     public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        let endElementProcess = DispatchQueue(label: "endElement", qos: .userInitiated, attributes: .concurrent)
+        
         switch elementName {
-            
         case "metadata":
             isMetadata = false
             
         case "trkpt":
-            let tempTrackPoint = GPXTrackPoint(dictionary: trackpointDict)
-            
-            self.trackpoints.append(tempTrackPoint)
+            let tempTrackPoint = GPXTrackPoint(dictionary: self.trackpointDict)
+            endElementProcess.async(flags: .barrier) {
+                self.trackpoints.append(tempTrackPoint)
+            }
  
             // clear values
             isTrackPoint = false

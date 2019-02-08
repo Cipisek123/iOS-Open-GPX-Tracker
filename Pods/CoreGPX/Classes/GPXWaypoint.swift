@@ -5,7 +5,7 @@
 //  Created by Vincent on 19/11/18.
 //
 
-import UIKit
+import Foundation
 
 open class GPXWaypoint: GPXElement {
     
@@ -49,7 +49,7 @@ open class GPXWaypoint: GPXElement {
         self.time = Date()
         super.init()
     }
-     
+    
     public init(latitude: Double, longitude: Double) {
         self.time = Date()
         super.init()
@@ -57,26 +57,30 @@ open class GPXWaypoint: GPXElement {
         self.longitude = longitude
     }
     
+    let waypointProcess = DispatchQueue(label: "pointTypeProcess", qos: .userInitiated, attributes: .concurrent)
+    
     public init(dictionary: [String:String]) {
-        self.time = ISO8601DateParser.parse(dictionary ["time"] ?? "")
+        self.time = ISO8601DateParser.parse(dictionary ["time"])
         super.init()
-        self.elevation = number(from: dictionary["ele"])
-        self.latitude = number(from: dictionary["lat"])
-        self.longitude = number(from: dictionary["lon"])
-        self.magneticVariation = number(from: dictionary["magvar"])
-        self.geoidHeight = number(from: dictionary["geoidheight"])
-        self.name = dictionary["name"]
-        self.comment = dictionary["cmt"]
-        self.desc = dictionary["desc"]
-        self.source = dictionary["src"]
-        self.symbol = dictionary["sym"]
-        self.type = dictionary["type"]
-        self.fix = integer(from: dictionary["fix"])
-        self.satellites = integer(from: dictionary["sat"])
-        self.horizontalDilution = number(from: dictionary["hdop"])
-        self.verticalDilution = number(from: dictionary["vdop"])
-        self.positionDilution = number(from: dictionary["pdop"])
-        self.DGPSid = integer(from: dictionary["dgpsid"])
+        waypointProcess.async(flags: .barrier) {
+            self.elevation = self.number(from: dictionary["ele"])
+            self.latitude = self.number(from: dictionary["lat"])
+            self.longitude = self.number(from: dictionary["lon"])
+            self.magneticVariation = self.number(from: dictionary["magvar"])
+            self.geoidHeight = self.number(from: dictionary["geoidheight"])
+            self.name = dictionary["name"]
+            self.comment = dictionary["cmt"]
+            self.desc = dictionary["desc"]
+            self.source = dictionary["src"]
+            self.symbol = dictionary["sym"]
+            self.type = dictionary["type"]
+            self.fix = self.integer(from: dictionary["fix"])
+            self.satellites = self.integer(from: dictionary["sat"])
+            self.horizontalDilution = self.number(from: dictionary["hdop"])
+            self.verticalDilution = self.number(from: dictionary["vdop"])
+            self.positionDilution = self.number(from: dictionary["pdop"])
+            self.DGPSid = self.integer(from: dictionary["dgpsid"])
+        }
     }
     
     // MARK:- Public Methods
@@ -153,7 +157,7 @@ open class GPXWaypoint: GPXElement {
         super.addChildTag(toGPX: gpx, indentationLevel: indentationLevel)
         
         self.addProperty(forDoubleValue: elevation, gpx: gpx, tagName: "ele", indentationLevel: indentationLevel)
-        self.addProperty(forValue: GPXType().value(forDateTime: time!), gpx: gpx, tagName: "time", indentationLevel: indentationLevel)
+        self.addProperty(forValue: GPXType().value(forDateTime: time), gpx: gpx, tagName: "time", indentationLevel: indentationLevel)
         self.addProperty(forDoubleValue: magneticVariation, gpx: gpx, tagName: "magvar", indentationLevel: indentationLevel)
         self.addProperty(forDoubleValue: geoidHeight, gpx: gpx, tagName: "geoidheight", indentationLevel: indentationLevel)
         self.addProperty(forValue: name, gpx: gpx, tagName: "name", indentationLevel: indentationLevel)
@@ -182,6 +186,8 @@ open class GPXWaypoint: GPXElement {
     
 }
 
+
+// MARK:- Date Parser
 // code from http://jordansmith.io/performant-date-parsing/
 // edited for use in CoreGPX
 
@@ -197,11 +203,13 @@ class ISO8601DateParser {
     private static let minute = UnsafeMutablePointer<Int>.allocate(capacity: 1)
     private static let second = UnsafeMutablePointer<Int>.allocate(capacity: 1)
     
-    static func parse(_ dateString: String) -> Date? {
-        if dateString != "" {
+    static func parse(_ dateString: String?) -> Date? {
+        guard let NonNilString = dateString else {
+            return nil
+        }
             _ = withVaList([year, month, day, hour, minute,
                             second], { pointer in
-                                vsscanf(dateString, "%d-%d-%dT%d:%d:%dZ", pointer)
+                                vsscanf(NonNilString, "%d-%d-%dT%d:%d:%dZ", pointer)
                                 
             })
             
@@ -221,10 +229,6 @@ class ISO8601DateParser {
             calendarCache[0] = calendar
             return calendar.date(from: components)
         }
-        else {
-            return nil
-        }
-    }
     
 }
 
